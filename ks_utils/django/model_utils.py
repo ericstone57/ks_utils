@@ -4,7 +4,11 @@ from datetime import datetime
 from django.utils.text import slugify
 
 
-def upload_to_app_based_folder(instance, filename):
+def upload_to(instance, filename):
+    return upload_to_app_based_folder(instance, filename)
+
+
+def upload_to_app_based_folder(instance: object, filename: object) -> object:
     filename_base, filename_ext = os.path.splitext(filename)
     return "upload/{app}/{instance}/{year}/{month}/{name}{extension}".format(
         app=slugify(instance._meta.app_label),
