@@ -1,5 +1,6 @@
 from datetime import datetime
 from io import BytesIO
+from typing import Any
 
 import pandas as pd
 from django.db.models import QuerySet
@@ -7,8 +8,16 @@ from django.http import HttpResponse
 from django.utils import timezone
 
 
-def excel_download(qs: QuerySet, fields: tuple, columns: list, sheet_name: str = 'exported', filename: str = 'exported.xlsx'):
-    data = list(qs.values_list(*fields))
+def excel_download(qs: Any, fields: tuple, columns: list, sheet_name: str = 'exported', filename: str = 'exported.xlsx'):
+    data = None
+    if isinstance(qs, QuerySet):
+        data = list(qs.values_list(*fields))
+    if isinstance(qs, list):
+        data = qs
+
+    if not data:
+        raise ValueError('qs should be QuerySet or list')
+
     for index, item in enumerate(data):
         data[index] = list(item)
         for k, v in enumerate(item):
