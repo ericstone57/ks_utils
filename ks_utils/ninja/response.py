@@ -9,22 +9,24 @@ from django.utils import timezone
 
 
 def excel_download(qs: Any, fields: tuple, columns: list, sheet_name: str = 'exported', filename: str = 'exported.xlsx'):
-    data = None
+    df = None
+
     if isinstance(qs, QuerySet):
-        data = list(qs.values_list(*fields))
+        data = []
+        for index, item in enumerate(list(qs.values_list(*fields))):
+            data[index] = list(item)
+            for k, v in enumerate(item):
+                if isinstance(v, datetime):
+                    data[index][k] = timezone.make_naive(v).strftime("%Y-%m-%d %H:%M")
+        df = pd.DataFrame(data, columns=columns)
     if isinstance(qs, list):
-        data = qs
+        for item in qs:
+            for k, v in item.items():
+                if isinstance(v, datetime):
+                    item[k] = timezone.make_naive(v).strftime("%Y-%m-%d %H:%M")
+        df = pd.DataFrame(qs, columns=list(fields))
+        df = df.rename(dict(zip(fields, columns)), axis='columns')
 
-    if not data:
-        raise ValueError('qs should be QuerySet or list')
-
-    for index, item in enumerate(data):
-        data[index] = list(item)
-        for k, v in enumerate(item):
-            if isinstance(v, datetime):
-                data[index][k] = timezone.make_naive(v).strftime("%Y-%m-%d %H:%M")
-
-    df = pd.DataFrame(data, columns=columns)
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
     df.to_excel(writer, sheet_name=sheet_name, index=False)
