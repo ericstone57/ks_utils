@@ -12,10 +12,10 @@ def excel_download(qs: Any, fields: tuple, columns: list, sheet_name: str = 'exp
     df = None
 
     if isinstance(qs, QuerySet):
-        data = []
-        for index, item in enumerate(list(qs.values_list(*fields))):
+        data = list(qs.values_list(*fields))
+        for index, item in enumerate(data):
             data[index] = list(item)
-            for k, v in enumerate(item):
+            for k, v in enumerate(list(data[index])):
                 if isinstance(v, datetime):
                     data[index][k] = timezone.make_naive(v).strftime("%Y-%m-%d %H:%M")
         df = pd.DataFrame(data, columns=columns)
