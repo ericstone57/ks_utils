@@ -100,11 +100,11 @@ class AbstractWXMPUser(BaseModelSoftDeletable):
 
     @classmethod
     def update_info(cls, data: dict):
-        if 'openid' not in data or not data['openid']:
-            raise ValueError('missing openid')
+        if 'uid' not in data or not data['uid']:
+            raise ValueError('missing uid')
 
         try:
-            user = cls.objects.filter(openid=data['openid']).last()
+            user = cls.objects.get(id=data['uid'])
             if data.get('nickName', ''):
                 user.name = data.get('nickName', '')
             # if data.get('gender', ''):
@@ -134,11 +134,11 @@ class AbstractWXMPUser(BaseModelSoftDeletable):
 
     @classmethod
     def update_phone_v2(cls, data: dict):
-        if 'openid' not in data or not data['openid']:
-            raise ValueError('missing openid')
+        if 'uid' not in data or not data['uid']:
+            raise ValueError('missing uid')
 
         try:
-            user = cls.objects.filter(openid=data['openid']).last()
+            user = cls.objects.get(id=data['uid'])
             user.cellphone = data['phoneNumber']
             user.save(update_fields=['cellphone'])
         except Exception as err:
@@ -146,11 +146,11 @@ class AbstractWXMPUser(BaseModelSoftDeletable):
 
     @classmethod
     def update_phone(cls, data: dict):
-        if 'openid' not in data or not data['openid']:
-            raise ValueError('missing openid')
+        if 'uid' not in data or not data['uid']:
+            raise ValueError('missing uid')
 
         try:
-            user = cls.objects.filter(openid=data['openid']).last()
+            user = cls.objects.get(id=data['uid'])
             user.cellphone = data['phone_number']
             user.save()
         except Exception as err:
