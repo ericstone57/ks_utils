@@ -1,7 +1,11 @@
 import os
 from datetime import datetime
+from io import BytesIO
+from urllib.request import urlopen
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from django.utils.text import slugify
+from requests.models import Response
 
 
 def upload_to(instance, filename):
