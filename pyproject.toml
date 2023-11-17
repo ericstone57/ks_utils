@@ -8,6 +8,7 @@ authors = ["Eric Lee <ericstone.dev@gmail.com>"]
 python = "^3.9"
 aliyun-mns-sdk = "^1.1.6"
 Django = "^3.2.18"
+tablestore = "^5.4.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
