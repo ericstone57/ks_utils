@@ -4,6 +4,7 @@ from os import environ
 from mns.account import Account
 from mns.mns_exception import MNSExceptionBase
 from mns.queue import Queue, Message
+from mns.topic import Topic, TopicMessage
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,14 @@ class MNSClient:
             q: Queue = self.account.get_queue(queue_name=queue_name)
             msg = Message(message_body=msg_body, delay_seconds=delay_seconds)
             return q.send_message(msg)
+        except MNSExceptionBase as err:
+            logger.error(err)
+
+    def send_topic_message(self, topic_name: str, msg_body: str, msg_tag: str = ''):
+        try:
+            topic: Topic = self.account.get_topic(topic_name=topic_name)
+            msg = TopicMessage(message_body=msg_body, message_tag=msg_tag)
+            return topic.publish_message(msg)
         except MNSExceptionBase as err:
             logger.error(err)
 
