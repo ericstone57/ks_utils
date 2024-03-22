@@ -286,6 +286,8 @@ class Client:
         if self._group_by_query:
             query['group_bys'] = self._group_by_query
 
+        print('xxxxxxxxx', query)
+
         return SearchQuery(**query)
 
     def __get_sort_query(self):
@@ -340,4 +342,4 @@ class Client:
                         temp_query.append(term_mapping[term['kind']](*term['condition']))
 
         if query_type in ['must', 'must_not', 'sort', 'agg', 'group_by']:
-            getattr(self, f'_{query_type}_query').extend(temp_query)
+            setattr(self, f'_{query_type}_query', temp_query)
