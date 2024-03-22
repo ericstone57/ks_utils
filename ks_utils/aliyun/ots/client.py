@@ -285,9 +285,6 @@ class Client:
             query['aggs'] = self._agg_query
         if self._group_by_query:
             query['group_bys'] = self._group_by_query
-
-        print('xxxxxxxxx', query)
-
         return SearchQuery(**query)
 
     def __get_sort_query(self):
