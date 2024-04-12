@@ -22,8 +22,8 @@ class KSPagination(PageNumberPagination):
         pagination: Input,
         **params: Any,
     ) -> Any:
-        offset = (pagination.page - 1) * self.page_size
+        offset = (pagination.page - 1) * pagination.per_page
         return {
-            "items": queryset[offset : offset + self.page_size],
+            "items": queryset[offset: offset + pagination.per_page],
             "total": self._items_count(queryset),
         }
