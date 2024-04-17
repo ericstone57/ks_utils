@@ -3,7 +3,7 @@ from os import environ
 
 from tablestore import OTSClient, TermQuery, TermsQuery, ColumnReturnType, ColumnsToGet, SearchQuery, \
     WildcardQuery, PrefixQuery, Sort, FieldSort, SortOrder, BoolQuery, \
-    RangeQuery, Count, DistinctCount, Sum, Avg, Max, Min, GroupByFilter
+    RangeQuery, Count, DistinctCount, Sum, Avg, Max, Min, GroupByFilter, Collapse
 
 logger = logging.getLogger(__name__)
 
@@ -187,6 +187,7 @@ class Client:
         self._sort_query = []
         self._agg_query = []
         self._group_by_query = []
+        self._collapse = None
 
         self.results = None
         self.agg_results = None
@@ -195,13 +196,13 @@ class Client:
         self.next_token = None
         self.is_all_succeed = True
 
-    def search(self, table_name: str, table_index: str, query: dict, limit=50, offset=0, columns_to_get=[]):
+    def search(self, table_name: str, table_index: str, query: dict, limit=50, offset=0, get_total_count=False, columns_to_get=[]):
         self.__prepare_query(query)
         r = self.client.search(
             table_name=table_name,
             index_name=table_index,
-            search_query=self.__get_search_query(limit=limit, offset=offset),
-            columns_to_get=ColumnsToGet(column_names=columns_to_get, return_type=ColumnReturnType.SPECIFIED) if columns_to_get else ColumnsToGet(return_type=ColumnReturnType.ALL)
+            search_query=self.__get_search_query(limit=limit, offset=offset, get_total_count=get_total_count),
+            columns_to_get=ColumnsToGet(column_names=columns_to_get, return_type=ColumnReturnType.SPECIFIED) if columns_to_get else ColumnsToGet(return_type=ColumnReturnType.ALL),
         )
         self.results = r.rows
         self.next_token = r.next_token
@@ -285,6 +286,8 @@ class Client:
             query['aggs'] = self._agg_query
         if self._group_by_query:
             query['group_bys'] = self._group_by_query
+        if self._collapse:
+            query['collapse_field'] = self._collapse
         return SearchQuery(**query)
 
     def __get_sort_query(self):
@@ -298,6 +301,10 @@ class Client:
             self.__build_query_terms(k, v)
 
     def __build_query_terms(self, query_type, terms):
+        if query_type == 'collapse':
+            self._collapse = Collapse(terms)
+            return
+
         term_mapping = {
             'term': TermQuery,
             'terms': TermsQuery,
