@@ -2,7 +2,7 @@ import logging
 from os import environ
 
 from tablestore import OTSClient, TermQuery, TermsQuery, ColumnReturnType, ColumnsToGet, SearchQuery, \
-    WildcardQuery, PrefixQuery, Sort, FieldSort, SortOrder, BoolQuery, \
+    WildcardQuery, PrefixQuery, Sort, FieldSort, SortOrder, BoolQuery, ExistsQuery, \
     RangeQuery, Count, DistinctCount, Sum, Avg, Max, Min, GroupByFilter, Collapse
 
 logger = logging.getLogger(__name__)
@@ -32,6 +32,10 @@ class Client:
             {
                 'kind': 'wildcard',
                 'condition': ('name', '*AA*')
+            },
+            {
+                'kind': 'exist',
+                'condition': ('name',)
             },
         ],
         'must_not': [
@@ -196,12 +200,28 @@ class Client:
         self.next_token = None
         self.is_all_succeed = True
 
-    def search(self, table_name: str, table_index: str, query: dict, limit=50, offset=0, get_total_count=False, columns_to_get=[]):
+    def search(self,
+               table_name: str,
+               table_index: str,
+               query: dict,
+               limit=50,
+               offset=0,
+               next_token=None,
+               get_total_count=False,
+               columns_to_get=None
+               ):
+        if columns_to_get is None:
+            columns_to_get = []
         self.__prepare_query(query)
         r = self.client.search(
             table_name=table_name,
             index_name=table_index,
-            search_query=self.__get_search_query(limit=limit, offset=offset, get_total_count=get_total_count),
+            search_query=self.__get_search_query(
+                limit=limit,
+                offset=offset,
+                next_token=next_token,
+                get_total_count=get_total_count
+            ),
             columns_to_get=ColumnsToGet(column_names=columns_to_get, return_type=ColumnReturnType.SPECIFIED) if columns_to_get else ColumnsToGet(return_type=ColumnReturnType.ALL),
         )
         self.results = r.rows
@@ -270,16 +290,23 @@ class Client:
     def get_total_count(self):
         return self.total_count
 
-    def __get_search_query(self, limit=50, offset=0, get_total_count=False):
+    def __get_search_query(self, limit=50, offset=0, next_token=None, get_total_count=False):
         query = {
             'query': BoolQuery(
                 must_queries=self._must_query,
                 must_not_queries=self._must_not_query
             ),
-            'limit': limit,
-            'offset': offset,
             'get_total_count': get_total_count,
         }
+        if next_token:
+            query.update({
+                'next_token': next_token
+            })
+        else:
+            query.update({
+                'limit': limit,
+                'offset': offset,
+            })
         if self._sort_query:
             query['sort'] = self.__get_sort_query()
         if self._agg_query:
@@ -311,6 +338,7 @@ class Client:
             'prefix': PrefixQuery,
             'range': RangeQuery,
             'wildcard': WildcardQuery,
+            'exist': ExistsQuery,
             'field': FieldSort,
             'count': Count,
             'distinct_count': DistinctCount,
