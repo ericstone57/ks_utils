@@ -200,6 +200,9 @@ class Client:
         self.next_token = None
         self.is_all_succeed = True
 
+    def get_client(self):
+        return self.client
+
     def search(self,
                table_name: str,
                table_index: str,
