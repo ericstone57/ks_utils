@@ -7,7 +7,7 @@ authors = ["Eric Lee <ericstone.dev@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.12"
 aliyun-mns-sdk = "^1.1.6"
-Django = "^4.2"
+Django = "^5.1.2"
 tablestore = "^6.0.1"
 
 [tool.poetry.dev-dependencies]
