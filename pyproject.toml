@@ -11,6 +11,7 @@ Django = "^5.1.2"
 tablestore = "^6.0.1"
 django-model-utils = "^5.0.0"
 shortuuid = "^1.0.13"
+pydantic = "^2.9.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^8.3.3"
