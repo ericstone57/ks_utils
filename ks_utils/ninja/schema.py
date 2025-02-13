@@ -31,7 +31,7 @@ class ImageResizeValidator:
         return 'image_process='
 
     def validate(self, value, info: ValidationInfo):
-        return f'{value}?{self.__get_resize_url_prefix()}resize,w_{self.width}/format,webp'
+        return f'{value}?{self.__get_resize_url_prefix()}resize,w_{self.width}/format,webp' if value else ''
 
 def image_resize_url(width: int):
     pic = Annotated[str, ImageResizeValidator(width=width)]
