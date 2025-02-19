@@ -1,5 +1,6 @@
 import shortuuid
 from model_utils.models import TimeStampedModel, SoftDeletableModel
+from taggit.models import CommonGenericTaggedItemBase, TaggedItemBase
 from django.db import models
 
 
@@ -30,3 +31,7 @@ class BaseModelSoftDeletable(TimeStampedModel, SoftDeletableModel):
 
     class Meta:
         abstract = True
+
+
+class TaggedItem(CommonGenericTaggedItemBase, TaggedItemBase):
+    object_id = models.CharField(max_length=50, verbose_name='Object id', db_index=True)
